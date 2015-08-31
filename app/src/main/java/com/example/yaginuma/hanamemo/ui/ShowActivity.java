@@ -1,16 +1,20 @@
 package com.example.yaginuma.hanamemo.ui;
 
 import android.content.Intent;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.yaginuma.hanamemo.R;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class ShowActivity extends AppCompatActivity {
 
@@ -58,18 +62,34 @@ public class ShowActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    void handleSendImage(Intent intent) {
+    private void handleSendImage(Intent intent) {
         Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
         if (imageUri != null) {
             ImageView imageView = (ImageView)findViewById(R.id.imageView);
             imageView.setImageURI(imageUri);
+            displayExifInfo(imageUri);
         }
     }
 
-    void handleSendMultipleImages(Intent intent) {
+    private void handleSendMultipleImages(Intent intent) {
         ArrayList<Uri> imageUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
         if (imageUris != null) {
             // Update UI to reflect multiple images being shared
+        }
+    }
+
+    private void displayExifInfo(Uri imageUri) {
+        try {
+            String result = "";
+            ExifInterface exifInterface = new ExifInterface(imageUri.toString());
+            String latitude = exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
+            String longitude = exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
+            String datetime = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
+            TextView textView = (TextView)findViewById(R.id.exitInfo);
+            textView.setText("datetime: " + datetime + " latitude: " + latitude + " longitude: " + longitude);
+        } catch(Exception e) {
+            Toast.makeText(this, "occur error when loadinf exif", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         }
     }
 }
